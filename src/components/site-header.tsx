@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
-import logoDark from "@/assets/skytlabs-logo-dark.png.asset.json";
+import logoDark from "@/assets/Skytlab logo M2.png";
 import { NAV_LINKS } from "@/lib/site-data";
 
 export function SiteHeader() {
@@ -11,7 +11,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-18 max-w-7xl items-center justify-between gap-6 px-5 py-4 lg:px-8">
         <Link to="/" className="shrink-0" aria-label="SkytLabs home">
-          <img src={logoDark.url} alt="SkytLabs Limited" className="h-8 w-auto dark:hidden" />
+          <img src={logoDark} alt="SkytLabs Limited" className="h-8 w-auto dark:hidden" />
           <img
             src={logoDark.url}
             alt=""

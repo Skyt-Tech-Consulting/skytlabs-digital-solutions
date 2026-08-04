@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Mail, MapPin } from "lucide-react";
-import logoLight from "@/assets/skytlabs-logo-light.png.asset.json";
+import logoLight from "@/assets/Skytlab logo M1.png";
 import { COMPANY, NAV_LINKS, SERVICE_GROUPS } from "@/lib/site-data";
 
 export function SiteFooter() {
@@ -8,7 +8,7 @@ export function SiteFooter() {
     <footer className="bg-navy text-navy-foreground">
       <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 lg:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
         <div>
-          <img src={logoLight.url} alt="SkytLabs Limited" className="h-8 w-auto" />
+          <img src={logoLight} alt="SkytLabs Limited" className="h-8 w-auto" />
           <p className="mt-5 max-w-sm text-sm leading-relaxed text-navy-foreground/70">
             {COMPANY.name} is a Nigerian IT consulting firm building, securing and operating the
             systems that enterprises run on — from strategy through to production support.
