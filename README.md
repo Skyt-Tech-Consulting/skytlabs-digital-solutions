@@ -23,11 +23,8 @@ I want to create a corporate website for an IT Consulting Company in Nigeria. Be
 Address: Plot 4, Church Street, Magodo GRA, Lagos.
 Email: info@skytlabs.com
 
-This project was built with [Lovable](https://lovable.dev).
+This project was built by [Skytlabs]().
 
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/910b504e-1bb5-4f53-82a0-6485fafbb25c).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
 - **Stay in sync**: every change made in Lovable is committed straight to this repository.
