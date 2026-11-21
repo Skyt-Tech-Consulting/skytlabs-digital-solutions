@@ -11,8 +11,6 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
 
 function NotFoundComponent() {
   return (
@@ -86,9 +84,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "SkytLabs Limited is a Nigerian IT consulting firm delivering software, automation, cloud, cybersecurity and data solutions for enterprises.",
       },
       { name: "author", content: "SkytLabs Limited" },
-      { property: "og:site_name", content: "SkytLabs Limited" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -98,24 +93,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap",
-      },
-    ],
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          name: "SkytLabs Limited",
-          email: "info@skytlabs.com",
-          url: "/",
-          address: {
-            "@type": "PostalAddress",
-            streetAddress: "Plot 4, Church Street, Magodo GRA",
-            addressLocality: "Lagos",
-            addressCountry: "NG",
-          },
-        }),
       },
     ],
   }),
@@ -144,15 +121,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex min-h-screen flex-col">
-        <SiteHeader />
-        <main className="flex-1">
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-        </main>
-        <SiteFooter />
-      </div>
+      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes.
+          The public site chrome lives in routes/_site.tsx; the admin shell in routes/admin/route.tsx. */}
+      <Outlet />
     </QueryClientProvider>
   );
 }
-

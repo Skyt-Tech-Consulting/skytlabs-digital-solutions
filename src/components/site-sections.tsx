@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+import type { LinkValue } from "@/lib/cms/types";
+import { CmsLink } from "./site-context";
 
 export function Section({
   children,
@@ -64,11 +65,13 @@ export function PageHero({
 }
 
 export function CtaBanner({
-  title = "Let's scope your next initiative",
-  body = "Tell us the outcome you need. We will come back with an approach, a timeline and the team that delivers it.",
+  title,
+  body,
+  button,
 }: {
-  title?: string;
-  body?: string;
+  title: string;
+  body: string;
+  button: LinkValue;
 }) {
   return (
     <section className="px-5 py-20 lg:px-8">
@@ -82,14 +85,68 @@ export function CtaBanner({
             <h2 className="text-3xl font-bold sm:text-4xl">{title}</h2>
             <p className="mt-4 text-navy-foreground/70">{body}</p>
           </div>
-          <Link
-            to="/contact"
-            className="inline-flex shrink-0 items-center justify-center rounded-md bg-cyan px-6 py-3.5 text-sm font-semibold text-cyan-foreground transition-opacity hover:opacity-90"
-          >
-            Start a conversation
-          </Link>
+          {button.label && (
+            <CmsLink
+              href={button.href}
+              className="inline-flex shrink-0 items-center justify-center rounded-md bg-cyan px-6 py-3.5 text-sm font-semibold text-cyan-foreground transition-opacity hover:opacity-90"
+            >
+              {button.label}
+            </CmsLink>
+          )}
         </div>
       </div>
     </section>
+  );
+}
+
+/** Bulleted list with the brand cyan dot used across the site. */
+export function DotList({ items }: { items: string[] }) {
+  return (
+    <ul className="mt-8 space-y-3 text-sm text-muted-foreground">
+      {items.map((item, index) => (
+        <li key={`${index}-${item}`} className="flex gap-3">
+          <span className="mt-2 size-1.5 shrink-0 rounded-full bg-cyan" aria-hidden="true" />
+          {item}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Content image that renders nothing when no image is set. */
+export function CmsImage({
+  image,
+  className,
+  width,
+  height,
+  eager,
+}: {
+  image: { src: string; alt: string };
+  className?: string;
+  width?: number;
+  height?: number;
+  eager?: boolean;
+}) {
+  if (!image.src) return null;
+  return (
+    <img
+      src={image.src}
+      alt={image.alt}
+      width={width}
+      height={height}
+      loading={eager ? undefined : "lazy"}
+      className={className}
+    />
+  );
+}
+
+export function PreviewBanner({ note }: { note?: string }) {
+  return (
+    <div className="sticky top-0 z-60 bg-gold px-5 py-2 text-center text-xs font-semibold text-gold-foreground">
+      Preview mode — you are viewing unpublished draft content.{note ? ` ${note}` : ""}{" "}
+      <a href="/admin" className="underline">
+        Back to admin
+      </a>
+    </div>
   );
 }

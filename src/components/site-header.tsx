@@ -1,29 +1,34 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
-import logoDark from "@/assets/Skytlab logo M2.png";
-import { NAV_LINKS } from "@/lib/site-data";
+import type { SiteSettings } from "@/lib/cms/defaults";
+import type { PagePaths } from "@/lib/cms/pages";
+import { CmsLink } from "./site-context";
 
-export function SiteHeader() {
+const NAV_ORDER = ["home", "about", "services", "products", "projects", "blog", "contact"] as const;
+
+export function buildNavLinks(site: SiteSettings, paths: PagePaths) {
+  return NAV_ORDER.map((key) => ({ key, to: paths[key], label: site.navigation[key] })).filter(
+    (link) => link.label.trim() !== "",
+  );
+}
+
+export function SiteHeader({ site, paths }: { site: SiteSettings; paths: PagePaths }) {
   const [open, setOpen] = useState(false);
+  const links = buildNavLinks(site, paths);
+  const { logo, cta } = site.header;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-18 max-w-7xl items-center justify-between gap-6 px-5 py-4 lg:px-8">
-        <Link to="/" className="shrink-0" aria-label="SkytLabs home">
-          <img src={logoDark} alt="SkytLabs Limited" className="h-8 w-auto dark:hidden" />
-          <img
-            src={logoDark.url}
-            alt=""
-            aria-hidden="true"
-            className="hidden h-8 w-auto brightness-0 invert dark:block"
-          />
+        <Link to="/" className="shrink-0" aria-label={`${site.company.shortName} home`}>
+          <img src={logo.src} alt={logo.alt} className="h-8 w-auto" />
         </Link>
 
         <nav className="hidden items-center gap-8 lg:flex" aria-label="Primary">
-          {NAV_LINKS.map((link) => (
+          {links.map((link) => (
             <Link
-              key={link.to}
+              key={link.key}
               to={link.to}
               activeOptions={{ exact: link.to === "/" }}
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground data-[status=active]:text-primary"
@@ -33,14 +38,16 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="hidden lg:block">
-          <Link
-            to="/contact"
-            className="inline-flex items-center rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-          >
-            Talk to us
-          </Link>
-        </div>
+        {cta.label && (
+          <div className="hidden lg:block">
+            <CmsLink
+              href={cta.href}
+              className="inline-flex items-center rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              {cta.label}
+            </CmsLink>
+          </div>
+        )}
 
         <button
           type="button"
@@ -54,10 +61,13 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <nav className="border-t border-border bg-background px-5 pb-5 lg:hidden" aria-label="Mobile">
+        <nav
+          className="border-t border-border bg-background px-5 pb-5 lg:hidden"
+          aria-label="Mobile"
+        >
           <ul className="flex flex-col">
-            {NAV_LINKS.map((link) => (
-              <li key={link.to}>
+            {links.map((link) => (
+              <li key={link.key}>
                 <Link
                   to={link.to}
                   activeOptions={{ exact: link.to === "/" }}
@@ -69,13 +79,15 @@ export function SiteHeader() {
               </li>
             ))}
           </ul>
-          <Link
-            to="/contact"
-            onClick={() => setOpen(false)}
-            className="mt-5 inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground"
-          >
-            Talk to us
-          </Link>
+          {cta.label && (
+            <CmsLink
+              href={cta.href}
+              onClick={() => setOpen(false)}
+              className="mt-5 inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground"
+            >
+              {cta.label}
+            </CmsLink>
+          )}
         </nav>
       )}
     </header>

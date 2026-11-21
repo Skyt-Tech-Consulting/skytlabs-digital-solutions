@@ -203,3 +203,101 @@
     var(--primary)
   );
 }
+
+/* Long-form article body rendered from Markdown (blog articles + admin preview). */
+@layer components {
+  .prose-article {
+    color: var(--color-foreground);
+    font-size: 1.0625rem;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+  }
+  .prose-article > * + * {
+    margin-top: 1.25em;
+  }
+  .prose-article h2 {
+    margin-top: 2em;
+    font-size: 1.75rem;
+    line-height: 1.25;
+    font-weight: 700;
+  }
+  .prose-article h3 {
+    margin-top: 1.75em;
+    font-size: 1.375rem;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+  .prose-article h4 {
+    margin-top: 1.5em;
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+  .prose-article a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .prose-article ul,
+  .prose-article ol {
+    padding-left: 1.5em;
+  }
+  .prose-article ul {
+    list-style: disc;
+  }
+  .prose-article ol {
+    list-style: decimal;
+  }
+  .prose-article li + li {
+    margin-top: 0.4em;
+  }
+  .prose-article li::marker {
+    color: var(--color-primary);
+  }
+  .prose-article blockquote {
+    border-left: 3px solid var(--brand-cyan);
+    padding-left: 1.25em;
+    color: var(--color-muted-foreground);
+    font-style: italic;
+  }
+  .prose-article img {
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+    max-width: 100%;
+    height: auto;
+  }
+  .prose-article code {
+    background: var(--color-muted);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+    font-size: 0.9em;
+  }
+  .prose-article pre {
+    background: var(--navy);
+    color: var(--navy-foreground);
+    border-radius: var(--radius-lg);
+    padding: 1.25em;
+    overflow-x: auto;
+    font-size: 0.875rem;
+  }
+  .prose-article pre code {
+    background: transparent;
+    padding: 0;
+  }
+  .prose-article hr {
+    border-color: var(--color-border);
+    margin: 2.5em 0;
+  }
+  .prose-article table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+    display: block;
+    overflow-x: auto;
+  }
+  .prose-article th,
+  .prose-article td {
+    border: 1px solid var(--color-border);
+    padding: 0.5em 0.75em;
+    text-align: left;
+  }
+}
