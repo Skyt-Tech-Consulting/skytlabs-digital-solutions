@@ -105,6 +105,37 @@ function escapeHtml(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
+export async function sendPasswordResetEmail(
+  to: string,
+  name: string,
+  resetUrl: string,
+  expiresInMinutes: number,
+): Promise<void> {
+  const text = [
+    `Hello ${name},`,
+    "",
+    "Someone asked to reset the password for your SkytLabs website admin account.",
+    `Use this link within ${expiresInMinutes} minutes to choose a new password:`,
+    "",
+    resetUrl,
+    "",
+    "Resetting your password signs out every device that is currently signed in.",
+    "If you did not ask for this, you can ignore this email; your password will not change.",
+  ].join("\n");
+  const html = `
+  <div style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;max-width:600px">
+    <p>Hello ${escapeHtml(name)},</p>
+    <p>Someone asked to reset the password for your SkytLabs website admin account.
+      Use the button below within ${expiresInMinutes} minutes to choose a new password.</p>
+    <p style="margin:24px 0"><a href="${escapeHtml(resetUrl)}"
+      style="background:#1d4ed8;color:#fff;padding:10px 18px;border-radius:6px;text-decoration:none;display:inline-block">Reset password</a></p>
+    <p style="color:#6b7280">Or paste this link into your browser:<br>${escapeHtml(resetUrl)}</p>
+    <p style="color:#6b7280">Resetting your password signs out every device that is currently signed in.
+      If you did not ask for this, ignore this email; your password will not change.</p>
+  </div>`;
+  await sendEmail({ to: [to], subject: "Reset your SkytLabs admin password", text, html });
+}
+
 export function parseRecipients(value: string): string[] {
   return value
     .split(/[,;\s]+/)

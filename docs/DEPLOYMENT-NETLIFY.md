@@ -192,6 +192,7 @@ and the sitemap use the real domain.
 | Code changes | Push to `main`; Netlify rebuilds automatically. Content is unaffected. |
 | Roll back a bad code deploy | Netlify → **Deploys** → choose an earlier deploy → **Publish deploy**. |
 | Add staff | Admin → **Users**. |
+| Forgotten or compromised password | On the sign-in page, click **Forgot password?** and enter your email. A link valid for 30 minutes arrives by email. Setting a new password signs out every device that was signed in. Needs email (step 2) working. |
 | Back up content | Neon keeps a short restore window on the free plan. For your own copy: `pg_dump "<DATABASE_URL>" > skytlabs-backup.sql`. Export enquiries to CSV from Admin → Enquiries. |
 | Watch usage | Netlify → **Usage & billing**; Neon → **Usage**. |
 

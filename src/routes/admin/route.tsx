@@ -25,11 +25,14 @@ import { Toaster } from "@/components/ui/sonner";
 import { adminLogout, getAdminSession } from "@/lib/cms/api/admin";
 import { cn } from "@/lib/utils";
 
+/** Pages reachable without signing in. */
+const PUBLIC_PATHS = ["/admin/login", "/admin/forgot-password", "/admin/reset-password"];
+
 export const Route = createFileRoute("/admin")({
   beforeLoad: async ({ location }) => {
     const user = await getAdminSession();
     const onLogin = location.pathname === "/admin/login";
-    if (!user && !onLogin) {
+    if (!user && !PUBLIC_PATHS.includes(location.pathname)) {
       throw redirect({ to: "/admin/login", search: { redirect: location.href } });
     }
     if (user && onLogin) throw redirect({ to: "/admin" });
@@ -57,7 +60,7 @@ function AdminLayout() {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  if (!user || location.pathname === "/admin/login") {
+  if (!user || PUBLIC_PATHS.includes(location.pathname)) {
     return (
       <>
         <Outlet />

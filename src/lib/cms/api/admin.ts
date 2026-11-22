@@ -3,7 +3,7 @@
  * requires a signed-in user; user management and settings require the admin role.
  */
 import { createServerFn } from "@tanstack/react-start";
-import { getRequestIP } from "@tanstack/react-start/server";
+import { getRequestIP, getRequestUrl } from "@tanstack/react-start/server";
 import { z } from "zod";
 import type { PageKey } from "../defaults";
 import { PAGES, isPageKey } from "../pages";
@@ -20,18 +20,26 @@ import type {
 } from "../types";
 import {
   authenticate,
+  createPasswordReset,
   endSession,
   getSessionUser,
   hashPassword,
   listStoredUsers,
   requireUser,
+  resetPasswordWithToken,
   saveStoredUsers,
   startSession,
   toPublicUser,
   validatePasswordStrength,
   AuthError,
 } from "../server/auth.server";
-import { getEmailStatus, parseRecipients, sendEmail } from "../server/email.server";
+import {
+  getEmailStatus,
+  parseRecipients,
+  sendEmail,
+  sendPasswordResetEmail,
+} from "../server/email.server";
+import { getEnv } from "../server/env.server";
 import { consumeRateLimit, resetRateLimit } from "../server/ratelimit.server";
 import { getTurnstileSiteKey } from "../server/spam.server";
 import {
@@ -40,6 +48,7 @@ import {
   deleteEnquiry,
   deleteMedia,
   discardPageDraft,
+  getActiveVersion,
   getAdminSettings,
   getArticle,
   getEnquiry,
@@ -83,6 +92,76 @@ export const adminLogin = createServerFn({ method: "POST" })
       if (!user) return { ok: false, error: "Incorrect email or password." };
       await resetRateLimit("login", limiterId);
       await startSession(user);
+      return { ok: true };
+    } catch (e) {
+      if (e instanceof AuthError) return { ok: false, error: e.message };
+      throw e;
+    }
+  });
+
+/**
+ * The public address used in reset links. Deliberately ignores X-Forwarded-Host so a forged
+ * header can't make the email point at someone else's site.
+ */
+async function trustedOrigin(): Promise<string> {
+  const site = (await getActiveVersion("site", false)).content as { seo?: { siteUrl?: string } };
+  const configured = site.seo?.siteUrl?.trim() || getEnv("URL")?.trim();
+  if (configured) return configured.replace(/\/+$/, "");
+  return getRequestUrl().origin;
+}
+
+const RESET_REQUESTED =
+  "If an account exists for that email, a reset link is on its way. It expires in 30 minutes; check your spam folder if it doesn't arrive.";
+
+export const requestPasswordReset = createServerFn({ method: "POST" })
+  .validator(z.object({ email: z.string().trim().toLowerCase().max(200) }))
+  .handler(
+    async ({ data }): Promise<{ ok: true; message: string } | { ok: false; error: string }> => {
+      const ip = getRequestIP({ xForwardedFor: true }) ?? "unknown";
+      if (
+        !(await consumeRateLimit("reset-ip", ip, 5, 15 * 60 * 1000)) ||
+        !(await consumeRateLimit("reset-email", data.email, 3, 60 * 60 * 1000))
+      ) {
+        return { ok: false, error: "Too many reset requests. Please wait a while and try again." };
+      }
+      if (!getEmailStatus().configured) {
+        return {
+          ok: false,
+          error:
+            "Email isn't set up on this website, so reset links can't be sent. Ask an administrator to reset your password.",
+        };
+      }
+      const reset = await createPasswordReset(data.email);
+      if (reset) {
+        const url = `${await trustedOrigin()}/admin/reset-password?token=${reset.token}`;
+        try {
+          await sendPasswordResetEmail(
+            reset.user.email,
+            reset.user.name,
+            url,
+            reset.expiresInMinutes,
+          );
+        } catch (e) {
+          // Logged only: telling the visitor would reveal that the account exists.
+          console.error("[password-reset] email failed:", e instanceof Error ? e.message : e);
+        }
+      }
+      return { ok: true, message: RESET_REQUESTED };
+    },
+  );
+
+export const resetPasswordFn = createServerFn({ method: "POST" })
+  .validator(z.object({ token: z.string().max(200), password: z.string().max(500) }))
+  .handler(async ({ data }): Promise<{ ok: true } | { ok: false; error: string }> => {
+    const ip = getRequestIP({ xForwardedFor: true }) ?? "unknown";
+    if (!(await consumeRateLimit("reset-use", ip, 10, 15 * 60 * 1000))) {
+      return { ok: false, error: "Too many attempts. Please wait 15 minutes." };
+    }
+    const weak = validatePasswordStrength(data.password);
+    if (weak) return { ok: false, error: weak };
+    try {
+      await resetPasswordWithToken(data.token, data.password);
+      endSession();
       return { ok: true };
     } catch (e) {
       if (e instanceof AuthError) return { ok: false, error: e.message };
@@ -461,5 +540,7 @@ export const setUserPasswordFn = createServerFn({ method: "POST" })
     target.salt = salt;
     target.passwordHash = hash;
     await saveStoredUsers(users);
+    // A new password signs out existing sessions; keep the person who changed their own.
+    if (target.email === me.email) await startSession(target);
     return { ok: true };
   });
